@@ -8,6 +8,44 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Bob's Corn Stand Colors */
+  --color-corn-yellow-50: var(--corn-yellow-50);
+  --color-corn-yellow-100: var(--corn-yellow-100);
+  --color-corn-yellow-200: var(--corn-yellow-200);
+  --color-corn-yellow-600: var(--corn-yellow-600);
+  --color-corn-yellow-700: var(--corn-yellow-700);
+  --color-corn-yellow-800: var(--corn-yellow-800);
+  --color-corn-yellow-900: var(--corn-yellow-900);
+  --color-corn-green-50: var(--corn-green-50);
+  --color-corn-green-100: var(--corn-green-100);
+  --color-corn-green-200: var(--corn-green-200);
+  --color-corn-green-700: var(--corn-green-700);
+  --color-corn-green-800: var(--corn-green-800);
+  --color-corn-green-900: var(--corn-green-900);
+  --color-corn-orange-50: var(--corn-orange-50);
+  --color-corn-orange-100: var(--corn-orange-100);
+  --color-corn-orange-200: var(--corn-orange-200);
+  --color-corn-orange-400: var(--corn-orange-400);
+  --color-corn-orange-700: var(--corn-orange-700);
+  --color-corn-orange-800: var(--corn-orange-800);
+  --color-corn-orange-900: var(--corn-orange-900);
+  --color-corn-blue-50: var(--corn-blue-50);
+  --color-corn-blue-100: var(--corn-blue-100);
+  --color-corn-blue-200: var(--corn-blue-200);
+  --color-corn-blue-800: var(--corn-blue-800);
+  --color-corn-blue-900: var(--corn-blue-900);
+  --color-corn-purple-50: var(--corn-purple-50);
+  --color-corn-purple-100: var(--corn-purple-100);
+  --color-corn-purple-200: var(--corn-purple-200);
+  --color-corn-purple-800: var(--corn-purple-800);
+  --color-corn-purple-900: var(--corn-purple-900);
+  --color-corn-pink-50: var(--corn-pink-50);
+  --color-corn-pink-100: var(--corn-pink-100);
+  --color-corn-pink-200: var(--corn-pink-200);
+  --color-corn-pink-800: var(--corn-pink-800);
+  --color-corn-pink-900: var(--corn-pink-900);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -45,6 +83,49 @@
 
 :root {
   --radius: 0.625rem;
+
+  /* Bob's Corn Stand Color Palette */
+  --corn-yellow-50: oklch(0.98 0.02 85);
+  --corn-yellow-100: oklch(0.95 0.05 85);
+  --corn-yellow-200: oklch(0.92 0.08 85);
+  --corn-yellow-600: oklch(0.7 0.15 85);
+  --corn-yellow-700: oklch(0.6 0.18 85);
+  --corn-yellow-800: oklch(0.5 0.2 85);
+  --corn-yellow-900: oklch(0.4 0.22 85);
+
+  --corn-green-50: oklch(0.97 0.02 130);
+  --corn-green-100: oklch(0.94 0.05 130);
+  --corn-green-200: oklch(0.91 0.08 130);
+  --corn-green-700: oklch(0.55 0.18 130);
+  --corn-green-800: oklch(0.45 0.2 130);
+  --corn-green-900: oklch(0.35 0.22 130);
+
+  --corn-orange-50: oklch(0.97 0.03 70);
+  --corn-orange-100: oklch(0.94 0.06 70);
+  --corn-orange-200: oklch(0.91 0.09 70);
+  --corn-orange-400: oklch(0.8 0.15 70);
+  --corn-orange-700: oklch(0.55 0.18 70);
+  --corn-orange-800: oklch(0.45 0.2 70);
+  --corn-orange-900: oklch(0.35 0.22 70);
+
+  --corn-blue-50: oklch(0.97 0.02 230);
+  --corn-blue-100: oklch(0.94 0.05 230);
+  --corn-blue-200: oklch(0.91 0.08 230);
+  --corn-blue-800: oklch(0.45 0.18 230);
+  --corn-blue-900: oklch(0.35 0.2 230);
+
+  --corn-purple-50: oklch(0.97 0.02 290);
+  --corn-purple-100: oklch(0.94 0.05 290);
+  --corn-purple-200: oklch(0.91 0.08 290);
+  --corn-purple-800: oklch(0.45 0.18 290);
+  --corn-purple-900: oklch(0.35 0.2 290);
+
+  --corn-pink-50: oklch(0.97 0.02 340);
+  --corn-pink-100: oklch(0.94 0.05 340);
+  --corn-pink-200: oklch(0.91 0.08 340);
+  --corn-pink-800: oklch(0.45 0.18 340);
+  --corn-pink-900: oklch(0.35 0.2 340);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
