@@ -4,9 +4,13 @@ import { cornPurchaseRateLimit } from "@/lib/rate-limiter";
 import { cornLogger } from "@/lib/corn-purchase-logger";
 import { CORN_PRICE } from "@/constants/corn";
 
+// Simple in-memory set to track ongoing purchases to prevent race conditions
+const ongoingPurchases = new Set<string>();
+
 export async function POST(request: NextRequest) {
   let attemptId: string | null = null;
   let requestBody: Record<string, unknown> = {};
+  let user: { id: string } | null = null; // Declare user outside try block for finally access
 
   try {
     // Parse request body early for logging
@@ -22,9 +26,11 @@ export async function POST(request: NextRequest) {
     // Get authenticated user
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { user: authenticatedUser },
       error: authError,
     } = await supabase.auth.getUser();
+
+    user = authenticatedUser; // Assign to variable accessible in finally
 
     if (authError || !user) {
       // Log auth error attempt
@@ -49,9 +55,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check rate limit
-    const { success: rateLimitSuccess, reset } =
-      await cornPurchaseRateLimit.limit(user.id);
+    // Check if there's already an ongoing purchase for this user (race condition protection)
+    if (ongoingPurchases.has(user.id)) {
+      console.log("Blocking concurrent purchase attempt for user:", user.id);
+
+      // Log rate limit attempt (treating concurrent requests as rate limited)
+      attemptId = await cornLogger.logAttempt({
+        userId: user.id,
+        attemptType: "rate_limited",
+        quantity,
+        requestedPrice: price,
+        totalPrice: price * quantity,
+        errorCode: "RATE_LIMITED",
+        errorMessage: "Purchase already in progress. Please wait.",
+        request,
+        responseStatus: 429,
+        requestBody,
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "RATE_LIMITED",
+          message: "Purchase already in progress. Please wait.",
+          retryAfter: 5, // Short retry for concurrent requests
+        },
+        { status: 429 }
+      );
+    }
+
+    // Mark this user as having an ongoing purchase
+    ongoingPurchases.add(user.id);
+
+    // Check rate limit with additional safety check
+    console.log("Rate limiting user:", user.id); // Debug log
+
+    // First, check current rate limit status
+    const rateLimitResult = await cornPurchaseRateLimit.limit(user.id);
+    const { success: rateLimitSuccess, reset, remaining } = rateLimitResult;
+
+    console.log("Rate limit result:", {
+      rateLimitSuccess,
+      reset,
+      remaining,
+      userId: user.id,
+    }); // Debug log
+
+    // Additional safety check: If this is the second request within a very short time frame,
+    // we should ensure rate limiting is properly enforced
+    if (rateLimitSuccess && remaining === 0) {
+      // This means we just consumed the last available request
+      console.log("Last available request consumed for user:", user.id);
+    }
 
     if (!rateLimitSuccess) {
       const now = Date.now();
@@ -203,6 +258,12 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
+  } finally {
+    // Always clean up the ongoing purchase tracking
+    if (user?.id) {
+      ongoingPurchases.delete(user.id);
+      console.log("Cleaned up ongoing purchase for user:", user.id);
+    }
   }
 }
 

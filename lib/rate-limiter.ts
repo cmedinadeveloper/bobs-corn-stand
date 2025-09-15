@@ -7,6 +7,7 @@ export const cornPurchaseRateLimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(1, `${RATE_LIMIT_WINDOW_SECONDS} s`), // 1 request per 60 seconds
   analytics: true,
   prefix: "@upstash/ratelimit/corn",
+  ephemeralCache: new Map(), // Add in-memory cache for immediate consistency
 });
 
 export type RateLimitResult = {
