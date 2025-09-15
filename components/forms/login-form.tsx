@@ -1,18 +1,55 @@
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginSchema, type LoginFormData } from "@/lib/auth-schemas";
+import { login } from "@/app/auth/actions";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await login(data);
+
+      console.log("Login result:", result);
+
+      if (!result.success && result.error) {
+        setError(result.error);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold text-corn-yellow-900">
@@ -22,6 +59,13 @@ export function LoginForm({
                   Login to access your fresh corn orders
                 </p>
               </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
               <div className="grid gap-3">
                 <Label htmlFor="email" className="text-corn-yellow-800">
                   Email
@@ -30,10 +74,18 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="farmer@example.com"
-                  required
-                  className="border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600"
+                  className={cn(
+                    "border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600",
+                    errors.email &&
+                      "border-red-300 focus:border-red-500 focus:ring-red-500"
+                  )}
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-sm text-red-600">{errors.email.message}</p>
+                )}
               </div>
+
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password" className="text-corn-yellow-800">
@@ -49,15 +101,26 @@ export function LoginForm({
                 <Input
                   id="password"
                   type="password"
-                  required
-                  className="border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600"
+                  className={cn(
+                    "border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600",
+                    errors.password &&
+                      "border-red-300 focus:border-red-500 focus:ring-red-500"
+                  )}
+                  {...register("password")}
                 />
+                {errors.password && (
+                  <p className="text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
+
               <Button
                 type="submit"
-                className="w-full bg-corn-yellow-600 hover:bg-corn-yellow-700 text-white"
+                disabled={isLoading}
+                className="w-full bg-corn-yellow-600 hover:bg-corn-yellow-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Login
+                {isLoading ? "Signing in..." : "Login"}
               </Button>
               <div className="after:border-corn-yellow-300 relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-corn-yellow-600 relative z-10 px-2">

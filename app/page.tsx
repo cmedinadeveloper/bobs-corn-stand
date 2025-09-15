@@ -35,12 +35,14 @@ export default function LandingPage() {
           🌽
         </p>
         <div className="flex space-x-4 pt-6">
-          <Button
-            size="lg"
-            className="bg-corn-yellow-600 text-white hover:bg-corn-yellow-700 text-lg px-8 py-3"
-          >
-            🌽 Get Your Corn
-          </Button>
+          <Link href="/dashboard">
+            <Button
+              size="lg"
+              className="bg-corn-yellow-600 text-white hover:bg-corn-yellow-700 text-lg px-8 py-3"
+            >
+              🌽 Get Your Corn
+            </Button>
+          </Link>
           <Link href="/meetbob">
             <Button
               size="lg"

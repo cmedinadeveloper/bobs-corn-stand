@@ -1,19 +1,53 @@
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { signupSchema, type SignupFormData } from "@/lib/auth-schemas";
+import { signup } from "@/app/auth/actions";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+  });
+
+  const onSubmit = async (data: SignupFormData) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await signup(data);
+      if (!result.success && result.error) {
+        setError(result.error);
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold text-corn-yellow-900">
@@ -23,6 +57,13 @@ export function SignupForm({
                   Create your account to start ordering fresh corn
                 </p>
               </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
+
               <div className="grid gap-3">
                 <Label htmlFor="firstName" className="text-corn-yellow-800">
                   First Name
@@ -31,9 +72,17 @@ export function SignupForm({
                   id="firstName"
                   type="text"
                   placeholder="Bob"
-                  required
-                  className="border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600"
+                  {...register("firstName")}
+                  className={cn(
+                    "border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600",
+                    errors.firstName && "border-red-500"
+                  )}
                 />
+                {errors.firstName && (
+                  <p className="text-sm text-red-600">
+                    {errors.firstName.message}
+                  </p>
+                )}
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="lastName" className="text-corn-yellow-800">
@@ -43,9 +92,17 @@ export function SignupForm({
                   id="lastName"
                   type="text"
                   placeholder="Farmer"
-                  required
-                  className="border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600"
+                  {...register("lastName")}
+                  className={cn(
+                    "border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600",
+                    errors.lastName && "border-red-500"
+                  )}
                 />
+                {errors.lastName && (
+                  <p className="text-sm text-red-600">
+                    {errors.lastName.message}
+                  </p>
+                )}
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="email" className="text-corn-yellow-800">
@@ -55,9 +112,15 @@ export function SignupForm({
                   id="email"
                   type="email"
                   placeholder="farmer@example.com"
-                  required
-                  className="border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600"
+                  {...register("email")}
+                  className={cn(
+                    "border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600",
+                    errors.email && "border-red-500"
+                  )}
                 />
+                {errors.email && (
+                  <p className="text-sm text-red-600">{errors.email.message}</p>
+                )}
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="password" className="text-corn-yellow-800">
@@ -67,9 +130,17 @@ export function SignupForm({
                   id="password"
                   type="password"
                   placeholder="At least 8 characters"
-                  required
-                  className="border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600"
+                  {...register("password")}
+                  className={cn(
+                    "border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600",
+                    errors.password && "border-red-500"
+                  )}
                 />
+                {errors.password && (
+                  <p className="text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
               <div className="grid gap-3">
                 <Label
@@ -82,39 +153,51 @@ export function SignupForm({
                   id="confirmPassword"
                   type="password"
                   placeholder="Confirm your password"
-                  required
-                  className="border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600"
+                  {...register("confirmPassword")}
+                  className={cn(
+                    "border-corn-yellow-300 focus:border-corn-yellow-600 focus:ring-corn-yellow-600",
+                    errors.confirmPassword && "border-red-500"
+                  )}
                 />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-600">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 <input
                   id="terms"
                   type="checkbox"
-                  required
+                  {...register("terms")}
                   className="rounded border-corn-yellow-300 text-corn-yellow-600 focus:ring-corn-yellow-600"
                 />
                 <Label htmlFor="terms" className="text-sm text-corn-yellow-700">
                   I agree to the{" "}
                   <Link
-                    href="#"
+                    href="/terms"
                     className="text-corn-orange-600 hover:text-corn-orange-800 underline"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
-                    href="#"
+                    href="/privacy"
                     className="text-corn-orange-600 hover:text-corn-orange-800 underline"
                   >
                     Privacy Policy
                   </Link>
                 </Label>
               </div>
+              {errors.terms && (
+                <p className="text-sm text-red-600">{errors.terms.message}</p>
+              )}
               <Button
                 type="submit"
-                className="w-full bg-corn-yellow-600 hover:bg-corn-yellow-700 text-white"
+                disabled={isLoading}
+                className="w-full bg-corn-yellow-600 hover:bg-corn-yellow-700 text-white disabled:opacity-50"
               >
-                Create Account
+                {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
               <div className="after:border-corn-yellow-300 relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-corn-yellow-600 relative z-10 px-2">

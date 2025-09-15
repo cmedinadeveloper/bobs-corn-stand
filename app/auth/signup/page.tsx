@@ -1,7 +1,7 @@
-import { LoginForm } from "@/components/forms/login-form";
+import { SignupForm } from "@/components/forms/signup-form";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-corn-yellow-50 to-corn-green-50 flex flex-col">
       {/* Header */}
@@ -15,10 +15,10 @@ export default function LoginPage() {
               </span>
             </Link>
             <Link
-              href="/signup"
-              className="bg-corn-yellow-600 hover:bg-corn-yellow-700 text-white px-4 py-2 rounded-md font-medium"
+              href="/auth/login"
+              className="text-corn-orange-600 hover:text-corn-orange-800 font-medium"
             >
-              Sign Up
+              Sign In
             </Link>
           </div>
         </div>
@@ -27,7 +27,7 @@ export default function LoginPage() {
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-4xl">
-          <LoginForm />
+          <SignupForm />
         </div>
       </main>
 
