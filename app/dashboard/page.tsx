@@ -1,24 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { OrderCard, OrderData } from "@/components/cards/order-card";
-import { AttemptCard } from "@/components/cards/attempt-card";
-import {
-  ClockIcon,
-  HeartIcon,
-  CheckCircledIcon,
-  GearIcon,
-} from "@radix-ui/react-icons";
+import { OrderData } from "@/components/cards/order-card";
 import {
   useSuccessfulPurchases,
   useAllAttempts,
@@ -26,6 +9,13 @@ import {
   calculateUserStats,
 } from "@/lib/hooks/use-corn-data";
 import { toast } from "sonner";
+import { CORN_PRICE } from "@/constants/corn";
+
+// Import new components
+import WelcomeSection from "@/features/dashboard/components/WelcomeSection";
+import StatsGrid from "@/features/dashboard/components/StatsGrid";
+import PurchaseSection from "@/features/dashboard/components/PurchaseSection";
+import OrderHistory from "@/features/dashboard/components/OrderHistory";
 
 export default function DashboardPage() {
   // SWR data fetching
@@ -90,7 +80,7 @@ export default function DashboardPage() {
     setIsLoading(true);
 
     try {
-      const result = await purchaseCorn(1, 5.0);
+      const result = await purchaseCorn(1, CORN_PRICE);
 
       if (result.success) {
         toast.success(result.message);
@@ -105,13 +95,15 @@ export default function DashboardPage() {
         setCanPurchase(false);
         setTimeRemaining(result.retryAfter);
 
-        // Set automatic re-enable
+        // Set automatic re-enable based on actual API response
         setTimeout(() => {
           setCanPurchase(true);
           setTimeRemaining(0);
+          toast.success("You can now purchase corn again! 🌽");
         }, result.retryAfter * 1000);
       } else {
         toast.error(result.message);
+        // Don't change purchase state for other errors
       }
     } catch (error) {
       console.error("Purchase error:", error);
@@ -121,287 +113,28 @@ export default function DashboardPage() {
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
   return (
     <main className="container mx-auto px-4 py-8">
-      {/* Welcome Section */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-corn-yellow-900 mb-2">
-          Welcome to your Corn Dashboard! 🌽
-        </h1>
-        <p className="text-corn-yellow-700">
-          Your one-stop shop for premium corn with Bob&apos;s famous
-          rate-limited ordering system.
-        </p>
-      </div>
+      <WelcomeSection />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="border-corn-yellow-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-corn-yellow-700">
-              Total Corn Purchased
-            </CardTitle>
-            <span className="text-2xl">🌽</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-corn-yellow-900">
-              {loadingSuccessful ? "..." : userStats.totalCornPurchased}
-            </div>
-            <p className="text-xs text-corn-yellow-600">Fresh ears delivered</p>
-          </CardContent>
-        </Card>
+      <StatsGrid userStats={userStats} loadingSuccessful={loadingSuccessful} />
 
-        <Card className="border-corn-yellow-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-corn-yellow-700">
-              Total Spent
-            </CardTitle>
-            <span className="text-2xl">💰</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-corn-yellow-900">
-              {loadingSuccessful
-                ? "..."
-                : `$${userStats.totalSpent.toFixed(2)}`}
-            </div>
-            <p className="text-xs text-corn-yellow-600">
-              Supporting local farming
-            </p>
-          </CardContent>
-        </Card>
+      <PurchaseSection
+        timeRemaining={timeRemaining}
+        canPurchase={canPurchase}
+        isLoading={isLoading}
+        onPurchaseCorn={handlePurchaseCorn}
+      />
 
-        <Card className="border-corn-yellow-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-corn-yellow-700">
-              Member Since
-            </CardTitle>
-            <span className="text-2xl">⭐</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-corn-yellow-900">
-              Sept 2024
-            </div>
-            <p className="text-xs text-corn-yellow-600">
-              Trusted corn enthusiast
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Purchase Section */}
-      <Card className="mb-8 border-corn-yellow-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-corn-yellow-900">
-            <span className="text-2xl">🛒</span>
-            Purchase Fresh Corn
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* Rate Limiting Display */}
-            <div className="bg-corn-yellow-50 border border-corn-yellow-200 rounded-lg p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <ClockIcon className="h-5 w-5 text-corn-yellow-700" />
-                <h3 className="font-semibold text-corn-yellow-900">
-                  Bob&apos;s Fair Share Policy
-                </h3>
-              </div>
-              <p className="text-corn-yellow-700 mb-3">
-                To ensure everyone gets fresh corn, we limit purchases to{" "}
-                <strong>1 corn per customer per minute</strong>.
-              </p>
-              {!canPurchase && (
-                <div className="flex items-center gap-2 text-corn-orange-700">
-                  <ClockIcon className="h-4 w-4" />
-                  <span className="font-mono font-semibold">
-                    Next purchase available in: {formatTime(timeRemaining)}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Purchase Interface */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="border border-corn-yellow-200 rounded-lg p-4 bg-white">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-3xl">🌽</span>
-                      <div>
-                        <h4 className="font-semibold text-corn-yellow-900">
-                          Premium Sweet Corn
-                        </h4>
-                        <p className="text-sm text-corn-yellow-600">
-                          Freshly picked this morning
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-corn-yellow-900">
-                        $5.00
-                      </div>
-                      <div className="text-sm text-corn-yellow-600">
-                        per ear
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-corn-green-700">
-                    <CheckCircledIcon className="h-4 w-4" />
-                    <span>Non-GMO</span>
-                    <CheckCircledIcon className="h-4 w-4" />
-                    <span>Locally grown</span>
-                    <CheckCircledIcon className="h-4 w-4" />
-                    <span>Farm fresh</span>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handlePurchaseCorn}
-                  disabled={!canPurchase || isLoading}
-                  className="w-full bg-corn-yellow-600 hover:bg-corn-yellow-700 text-white disabled:bg-corn-yellow-300"
-                >
-                  {isLoading
-                    ? "Processing..."
-                    : !canPurchase
-                    ? `Wait ${formatTime(timeRemaining)}`
-                    : "Buy 1 Corn for $5.00"}
-                </Button>
-              </div>
-
-              <div className="bg-corn-green-50 border border-corn-green-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <HeartIcon className="h-5 w-5 text-corn-green-700" />
-                  <h4 className="font-semibold text-corn-green-900">
-                    Why Choose Bob&apos;s Corn?
-                  </h4>
-                </div>
-                <ul className="space-y-2 text-sm text-corn-green-700">
-                  <li>• Harvested at peak sweetness</li>
-                  <li>• Sustainable farming practices</li>
-                  <li>• Support local agriculture</li>
-                  <li>• API-powered freshness guarantee</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Order History */}
-      <Card className="border-corn-yellow-200">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-corn-yellow-900">
-              <span className="text-2xl">📦</span>
-              Your Corn Order History
-            </CardTitle>
-            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <GearIcon className="h-4 w-4" />
-                  View All Attempts
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="w-[400px] sm:w-[540px]">
-                <SheetHeader>
-                  <SheetTitle>Purchase Attempts History</SheetTitle>
-                  <SheetDescription>
-                    View all your corn purchase attempts including successful
-                    purchases, rate limits, and errors.
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  {/* Summary Stats */}
-                  {allAttemptsData && (
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-corn-yellow-50 rounded-lg">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-corn-yellow-900">
-                          {allAttemptsData.summary.total_attempts}
-                        </div>
-                        <div className="text-sm text-corn-yellow-600">
-                          Total Attempts
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-corn-green-700">
-                          {allAttemptsData.summary.successful_purchases}
-                        </div>
-                        <div className="text-sm text-corn-yellow-600">
-                          Successful
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Attempts List */}
-                  <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                    {loadingAttempts ? (
-                      <div className="text-center py-8">
-                        <div className="text-corn-yellow-600">
-                          Loading attempts...
-                        </div>
-                      </div>
-                    ) : allAttemptsData &&
-                      allAttemptsData.attempts.length > 0 ? (
-                      allAttemptsData.attempts.map((attempt) => (
-                        <AttemptCard key={attempt.id} attempt={attempt} />
-                      ))
-                    ) : (
-                      <div className="text-center py-8">
-                        <span className="text-4xl mb-2 block">🌽</span>
-                        <div className="text-corn-yellow-600">
-                          No attempts yet
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loadingSuccessful ? (
-            <div className="text-center py-8">
-              <div className="text-corn-yellow-600">
-                Loading your corn orders...
-              </div>
-            </div>
-          ) : successfulError ? (
-            <div className="text-center py-8">
-              <span className="text-4xl mb-2 block">⚠️</span>
-              <h3 className="text-lg font-semibold text-red-600 mb-2">
-                Failed to load orders
-              </h3>
-              <p className="text-red-500">
-                Please refresh the page or try again later.
-              </p>
-            </div>
-          ) : orders.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {orders.map((order) => (
-                <OrderCard key={order.transactionId} order={order} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <span className="text-6xl mb-4 block">🌽</span>
-              <h3 className="text-lg font-semibold text-corn-yellow-900 mb-2">
-                No corn orders yet!
-              </h3>
-              <p className="text-corn-yellow-600">
-                Start your corn journey by making your first purchase above.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <OrderHistory
+        orders={orders}
+        loadingSuccessful={loadingSuccessful}
+        successfulError={successfulError}
+        sheetOpen={sheetOpen}
+        onSheetOpenChange={setSheetOpen}
+        allAttemptsData={allAttemptsData}
+        loadingAttempts={loadingAttempts}
+      />
     </main>
   );
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { cornPurchaseRateLimit } from "@/lib/rate-limiter";
 import { cornLogger } from "@/lib/corn-purchase-logger";
+import { CORN_PRICE } from "@/constants/corn";
 
 export async function POST(request: NextRequest) {
   let attemptId: string | null = null;
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const quantity = (requestBody.quantity as number) || 1;
-    const price = (requestBody.price as number) || 5.0;
+    const price = (requestBody.price as number) || CORN_PRICE;
 
     // Get authenticated user
     const supabase = await createClient();

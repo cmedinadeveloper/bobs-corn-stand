@@ -4,8 +4,8 @@ import {
   BuyCornResponse,
   CornPurchaseAttemptResponse,
 } from "@/lib/types/corn-purchase";
+import { CORN_PRICE } from "@/constants/corn";
 
-// Fetcher function for SWR
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -71,7 +71,7 @@ export function useAllAttempts(limit = 50) {
 // Purchase corn function with error handling
 export async function purchaseCorn(
   quantity = 1,
-  price = 5.0
+  price = CORN_PRICE
 ): Promise<BuyCornResponse> {
   const response = await fetch("/api/buy-corn", {
     method: "POST",

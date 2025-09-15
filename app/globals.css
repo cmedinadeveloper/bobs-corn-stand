@@ -201,3 +201,42 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Toast styling for different types */
+@layer components {
+  [data-sonner-toast][data-type="success"] {
+    --normal-bg: var(--corn-green-50);
+    --normal-border: var(--corn-green-200);
+    --normal-text: var(--corn-green-900);
+  }
+
+  [data-sonner-toast][data-type="error"] {
+    --normal-bg: oklch(0.97 0.03 15);
+    --normal-border: oklch(0.91 0.09 15);
+    --normal-text: oklch(0.35 0.22 15);
+  }
+
+  [data-sonner-toast][data-type="warning"] {
+    --normal-bg: var(--corn-yellow-50);
+    --normal-border: var(--corn-yellow-200);
+    --normal-text: var(--corn-yellow-900);
+  }
+
+  .dark [data-sonner-toast][data-type="success"] {
+    --normal-bg: var(--corn-green-900);
+    --normal-border: var(--corn-green-700);
+    --normal-text: var(--corn-green-100);
+  }
+
+  .dark [data-sonner-toast][data-type="error"] {
+    --normal-bg: oklch(0.35 0.22 15);
+    --normal-border: oklch(0.45 0.18 15);
+    --normal-text: oklch(0.94 0.06 15);
+  }
+
+  .dark [data-sonner-toast][data-type="warning"] {
+    --normal-bg: var(--corn-yellow-900);
+    --normal-border: var(--corn-yellow-700);
+    --normal-text: var(--corn-yellow-100);
+  }
+}
