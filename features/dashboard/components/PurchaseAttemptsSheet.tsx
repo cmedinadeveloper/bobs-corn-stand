@@ -73,16 +73,28 @@ export default function PurchaseAttemptsSheet({
           <div className="space-y-3 max-h-[50vh] sm:max-h-[60vh] overflow-y-auto p-2">
             {loadingAttempts ? (
               <div className="text-center py-8">
-                <div className="text-corn-yellow-600">Loading attempts...</div>
+                <div className="animate-pulse">
+                  <div className="text-2xl mb-2">🌽</div>
+                  <div className="text-corn-yellow-600">
+                    Loading attempts...
+                  </div>
+                </div>
               </div>
             ) : allAttemptsData && allAttemptsData.attempts.length > 0 ? (
               allAttemptsData.attempts.map((attempt) => (
                 <AttemptCard key={attempt.id} attempt={attempt} />
               ))
             ) : (
-              <div className="text-center py-8">
-                <span className="text-4xl mb-2 block">🌽</span>
-                <div className="text-corn-yellow-600">No attempts yet</div>
+              <div className="text-center py-12">
+                <span className="text-5xl mb-4 block animate-bounce">🌽</span>
+                <h3 className="text-lg font-semibold text-corn-yellow-900 mb-2">
+                  No purchase attempts yet
+                </h3>
+                <p className="text-corn-yellow-600 text-sm max-w-sm mx-auto">
+                  Your purchase history will appear here once you start making
+                  corn purchases. Each attempt - successful or not - will be
+                  tracked!
+                </p>
               </div>
             )}
           </div>

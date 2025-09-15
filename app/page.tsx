@@ -148,12 +148,14 @@ export default function LandingPage() {
             field!
           </p>
           <div className="mt-8 flex space-x-4 justify-center">
-            <Button
-              size="lg"
-              className="bg-white text-corn-yellow-600 hover:bg-corn-yellow-50 font-semibold text-lg px-8 py-3"
-            >
-              🌽 Order Your Corn
-            </Button>
+            <Link href="/dashboard">
+              <Button
+                size="lg"
+                className="bg-white text-corn-yellow-600 hover:bg-corn-yellow-50 font-semibold text-lg px-8 py-3"
+              >
+                🌽 Order Your Corn
+              </Button>
+            </Link>
             <Button
               size="lg"
               variant="outline"

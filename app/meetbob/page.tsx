@@ -236,7 +236,7 @@ export default function MeetBobPage() {
           wait.
         </p>
         <div className="flex space-x-4 justify-center">
-          <Link href="/">
+          <Link href="/dashboard">
             <Button
               size="lg"
               className="bg-yellow-600 text-white hover:bg-yellow-700 text-lg px-8 py-3"

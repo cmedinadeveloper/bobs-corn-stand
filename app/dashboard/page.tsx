@@ -11,7 +11,6 @@ import {
 import { toast } from "sonner";
 import { CORN_PRICE } from "@/constants/corn";
 
-// Import new components
 import WelcomeSection from "@/features/dashboard/components/WelcomeSection";
 import StatsGrid from "@/features/dashboard/components/StatsGrid";
 import PurchaseSection from "@/features/dashboard/components/PurchaseSection";
@@ -37,27 +36,29 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  // Calculate stats from real data
-  const userStats = successfulData
-    ? calculateUserStats(successfulData.attempts)
-    : {
-        totalCornPurchased: 0,
-        totalSpent: 0,
-        lastPurchase: null,
-        totalAttempts: 0,
-        successRate: 0,
-      };
+  // Calculate stats from real data - handle empty data gracefully
+  const userStats =
+    successfulData && successfulData.attempts
+      ? calculateUserStats(successfulData.attempts)
+      : {
+          totalCornPurchased: 0,
+          totalSpent: 0,
+          lastPurchase: null,
+          totalAttempts: 0,
+          successRate: 0,
+        };
 
-  // Convert successful attempts to OrderData format for existing UI
-  const orders: OrderData[] = successfulData
-    ? successfulData.attempts.map((attempt) => ({
-        transactionId: attempt.purchase_id || attempt.id,
-        cornAmount: attempt.quantity || 1,
-        timestamp: attempt.created_at,
-        price: attempt.total_price || 0,
-        status: "completed" as const,
-      }))
-    : [];
+  // Convert successful attempts to OrderData format for existing UI - handle empty data gracefully
+  const orders: OrderData[] =
+    successfulData && successfulData.attempts
+      ? successfulData.attempts.map((attempt) => ({
+          transactionId: attempt.purchase_id || attempt.id,
+          cornAmount: attempt.quantity || 1,
+          timestamp: attempt.created_at,
+          price: attempt.total_price || 0,
+          status: "completed" as const,
+        }))
+      : [];
 
   // Simulate rate limiting countdown
   useEffect(() => {

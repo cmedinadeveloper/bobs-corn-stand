@@ -6,11 +6,36 @@ import {
 } from "@/lib/types/corn-purchase";
 import { CORN_PRICE } from "@/constants/corn";
 
+interface FetchError extends Error {
+  status?: number;
+  code?: string;
+}
+
 const fetcher = async (url: string) => {
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    credentials: "include", // Include cookies for authentication
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
   if (!response.ok) {
-    throw new Error("Failed to fetch data");
+    // Try to get error details from response
+    try {
+      const errorData = await response.json();
+      const error: FetchError = new Error(
+        errorData.message || "Failed to fetch data"
+      );
+      error.status = response.status;
+      error.code = errorData.error;
+      throw error;
+    } catch {
+      const error: FetchError = new Error("Failed to fetch data");
+      error.status = response.status;
+      throw error;
+    }
   }
+
   return response.json();
 };
 
@@ -38,7 +63,7 @@ export function useCornHistory(
 
   return {
     data: data?.success ? data : null,
-    error: error || (data && !data.success ? data : null),
+    error: error || (!data?.success && data ? data : null),
     isLoading,
     mutate,
   };
@@ -62,7 +87,7 @@ export function useAllAttempts(limit = 50) {
 
   return {
     data: data?.success ? data : null,
-    error: error || (data && !data.success ? data : null),
+    error: error || (!data?.success && data ? data : null),
     isLoading,
     mutate,
   };
@@ -75,6 +100,7 @@ export async function purchaseCorn(
 ): Promise<BuyCornResponse> {
   const response = await fetch("/api/buy-corn", {
     method: "POST",
+    credentials: "include", // Include cookies for authentication
     headers: {
       "Content-Type": "application/json",
     },
