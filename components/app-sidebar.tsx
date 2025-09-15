@@ -9,14 +9,11 @@ import {
   IconFileAi,
   IconFileDescription,
   IconFileWord,
-  IconFolder,
   IconHelp,
-  IconInnerShadowTop,
   IconListDetails,
   IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -33,116 +30,117 @@ import {
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Bob Farmer",
+    email: "bob@cornstand.com",
+    avatar: "/avatars/bob.jpg",
   },
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconDashboard,
+      isActive: true,
     },
     {
-      title: "Lifecycle",
-      url: "#",
+      title: "Order History",
+      url: "/dashboard/orders",
       icon: IconListDetails,
     },
     {
       title: "Analytics",
-      url: "#",
+      url: "/dashboard/analytics",
       icon: IconChartBar,
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
+      title: "Corn Inventory",
+      url: "/dashboard/inventory",
+      icon: IconDatabase,
     },
     {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
+      title: "Rate Limits",
+      url: "/dashboard/limits",
+      icon: IconReport,
     },
   ],
   navClouds: [
     {
-      title: "Capture",
+      title: "Fresh Corn",
       icon: IconCamera,
       isActive: true,
-      url: "#",
+      url: "/dashboard/corn",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          title: "Available Stock",
+          url: "/dashboard/corn/available",
         },
         {
-          title: "Archived",
-          url: "#",
+          title: "Pre-orders",
+          url: "/dashboard/corn/preorders",
         },
       ],
     },
     {
-      title: "Proposal",
+      title: "Orders",
       icon: IconFileDescription,
-      url: "#",
+      url: "/dashboard/orders",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          title: "Active Orders",
+          url: "/dashboard/orders/active",
         },
         {
-          title: "Archived",
-          url: "#",
+          title: "Order History",
+          url: "/dashboard/orders/history",
         },
       ],
     },
     {
-      title: "Prompts",
+      title: "Customer Care",
       icon: IconFileAi,
-      url: "#",
+      url: "/dashboard/support",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          title: "Help Center",
+          url: "/dashboard/support/help",
         },
         {
-          title: "Archived",
-          url: "#",
+          title: "Contact Bob",
+          url: "/dashboard/support/contact",
         },
       ],
     },
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "#",
+      title: "Account Settings",
+      url: "/dashboard/settings",
       icon: IconSettings,
     },
     {
       title: "Get Help",
-      url: "#",
+      url: "/dashboard/help",
       icon: IconHelp,
     },
     {
-      title: "Search",
-      url: "#",
+      title: "Search Orders",
+      url: "/dashboard/search",
       icon: IconSearch,
     },
   ],
   documents: [
     {
-      name: "Data Library",
-      url: "#",
+      name: "Corn Library",
+      url: "/dashboard/library",
       icon: IconDatabase,
     },
     {
-      name: "Reports",
-      url: "#",
+      name: "Purchase Reports",
+      url: "/dashboard/reports",
       icon: IconReport,
     },
     {
-      name: "Word Assistant",
-      url: "#",
+      name: "API Documentation",
+      url: "/dashboard/api-docs",
       icon: IconFileWord,
     },
   ],
@@ -150,26 +148,32 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+    <Sidebar
+      collapsible="offcanvas"
+      className="border-corn-yellow-200"
+      {...props}
+    >
+      <SidebarHeader className="bg-corn-yellow-50">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:!p-1.5 hover:bg-corn-yellow-100"
             >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+              <a href="/dashboard">
+                <span className="text-2xl">🌽</span>
+                <span className="text-base font-semibold text-corn-yellow-900">
+                  Bob&apos;s Corn Stand
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-corn-yellow-25">
         <NavMain items={data.navMain} />
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="bg-corn-yellow-50">
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>

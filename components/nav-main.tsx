@@ -35,7 +35,9 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-corn-yellow-700 font-semibold">
+        Corn Dashboard
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -46,7 +48,14 @@ export function NavMain({
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  className={`hover:bg-corn-yellow-100 hover:text-corn-yellow-900 ${
+                    item.isActive
+                      ? "bg-corn-yellow-100 text-corn-yellow-900"
+                      : "text-corn-yellow-700"
+                  }`}
+                >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -56,7 +65,10 @@ export function NavMain({
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        className="hover:bg-corn-yellow-50 text-corn-yellow-600 hover:text-corn-yellow-800"
+                      >
                         <a href={subItem.url}>
                           <span>{subItem.title}</span>
                         </a>
