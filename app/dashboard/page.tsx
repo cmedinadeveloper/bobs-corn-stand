@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OrderCard, OrderData } from "@/components/ui/order-card";
+import { OrderCard, OrderData } from "@/components/cards/order-card";
 import { ClockIcon, HeartIcon, CheckCircledIcon } from "@radix-ui/react-icons";
 
 // Mock data for demonstration
