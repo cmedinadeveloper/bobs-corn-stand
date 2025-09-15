@@ -63,7 +63,7 @@ export function ForgotPasswordForm({
               We&apos;ve sent password reset instructions to your email address.
             </p>
             <Link
-              href="/login"
+              href="/auth/login"
               className="text-corn-orange-600 hover:text-corn-orange-800 underline underline-offset-4"
             >
               Back to login
@@ -128,7 +128,7 @@ export function ForgotPasswordForm({
                 <p className="text-sm text-corn-yellow-700 mb-4">
                   Remember your password?{" "}
                   <Link
-                    href="/login"
+                    href="/auth/login"
                     className="text-corn-orange-600 hover:text-corn-orange-800 underline underline-offset-4"
                   >
                     Back to login
@@ -137,7 +137,7 @@ export function ForgotPasswordForm({
                 <p className="text-xs text-corn-yellow-600">
                   Don&apos;t have an account yet?{" "}
                   <Link
-                    href="/signup"
+                    href="/auth/signup"
                     className="text-corn-orange-600 hover:text-corn-orange-800 underline underline-offset-4"
                   >
                     Sign up here

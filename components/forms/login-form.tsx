@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, type LoginFormData } from "@/lib/auth-schemas";
 import { login } from "@/app/auth/actions";
+import Link from "next/link";
 
 export function LoginForm({
   className,
@@ -91,12 +92,12 @@ export function LoginForm({
                   <Label htmlFor="password" className="text-corn-yellow-800">
                     Password
                   </Label>
-                  <a
-                    href="/forgot-password"
+                  <Link
+                    href="/auth/forgot-password"
                     className="ml-auto text-sm underline-offset-2 hover:underline text-corn-orange-600 hover:text-corn-orange-800"
                   >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <Input
                   id="password"
@@ -170,12 +171,12 @@ export function LoginForm({
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a
-                  href="/signup"
+                <Link
+                  href="/auth/signup"
                   className="underline underline-offset-4 text-corn-orange-600 hover:text-corn-orange-800"
                 >
                   Sign up
-                </a>
+                </Link>
               </div>
             </div>
           </form>
