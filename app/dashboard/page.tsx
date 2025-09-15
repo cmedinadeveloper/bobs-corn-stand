@@ -3,39 +3,71 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { OrderCard, OrderData } from "@/components/cards/order-card";
-import { ClockIcon, HeartIcon, CheckCircledIcon } from "@radix-ui/react-icons";
-
-// Mock data for demonstration
-const mockOrders: OrderData[] = [
-  {
-    transactionId: "TXN-001",
-    cornAmount: 1,
-    timestamp: "2024-09-14T10:30:00Z",
-    price: 2.99,
-    status: "completed",
-  },
-  {
-    transactionId: "TXN-002",
-    cornAmount: 1,
-    timestamp: "2024-09-13T14:15:00Z",
-    price: 2.99,
-    status: "completed",
-  },
-  {
-    transactionId: "TXN-003",
-    cornAmount: 1,
-    timestamp: "2024-09-12T09:45:00Z",
-    price: 2.99,
-    status: "completed",
-  },
-];
+import { AttemptCard } from "@/components/cards/attempt-card";
+import {
+  ClockIcon,
+  HeartIcon,
+  CheckCircledIcon,
+  GearIcon,
+} from "@radix-ui/react-icons";
+import {
+  useSuccessfulPurchases,
+  useAllAttempts,
+  purchaseCorn,
+  calculateUserStats,
+} from "@/lib/hooks/use-corn-data";
+import { toast } from "sonner";
 
 export default function DashboardPage() {
+  // SWR data fetching
+  const {
+    data: successfulData,
+    isLoading: loadingSuccessful,
+    mutate: mutateSuccessful,
+    error: successfulError,
+  } = useSuccessfulPurchases();
+  const {
+    data: allAttemptsData,
+    isLoading: loadingAttempts,
+    mutate: mutateAttempts,
+  } = useAllAttempts();
+
+  // Local state
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [canPurchase, setCanPurchase] = useState(true);
-  const [orders] = useState<OrderData[]>(mockOrders);
   const [isLoading, setIsLoading] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Calculate stats from real data
+  const userStats = successfulData
+    ? calculateUserStats(successfulData.attempts)
+    : {
+        totalCornPurchased: 0,
+        totalSpent: 0,
+        lastPurchase: null,
+        totalAttempts: 0,
+        successRate: 0,
+      };
+
+  // Convert successful attempts to OrderData format for existing UI
+  const orders: OrderData[] = successfulData
+    ? successfulData.attempts.map((attempt) => ({
+        transactionId: attempt.purchase_id || attempt.id,
+        cornAmount: attempt.quantity || 1,
+        timestamp: attempt.created_at,
+        price: attempt.total_price || 0,
+        status: "completed" as const,
+      }))
+    : [];
 
   // Simulate rate limiting countdown
   useEffect(() => {
@@ -56,29 +88,43 @@ export default function DashboardPage() {
 
   const handlePurchaseCorn = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Simulate successful purchase
-    setCanPurchase(false);
-    setTimeRemaining(60); // 1 minute cooldown
-    setIsLoading(false);
+    try {
+      const result = await purchaseCorn(1, 5.0);
+
+      if (result.success) {
+        toast.success(result.message);
+        // Refresh data
+        mutateSuccessful();
+        mutateAttempts();
+        // Reset purchase state
+        setCanPurchase(true);
+        setTimeRemaining(0);
+      } else if (result.error === "RATE_LIMITED") {
+        toast.error(result.message);
+        setCanPurchase(false);
+        setTimeRemaining(result.retryAfter);
+
+        // Set automatic re-enable
+        setTimeout(() => {
+          setCanPurchase(true);
+          setTimeRemaining(0);
+        }, result.retryAfter * 1000);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Purchase error:", error);
+      toast.error("Failed to purchase corn. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const userStats = {
-    totalCornPurchased: orders
-      .filter((o) => o.status === "completed")
-      .reduce((sum, o) => sum + o.cornAmount, 0),
-    totalSpent: orders
-      .filter((o) => o.status === "completed")
-      .reduce((sum, o) => sum + o.price, 0),
-    lastPurchase: orders[0]?.timestamp,
   };
 
   return (
@@ -105,7 +151,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-corn-yellow-900">
-              {userStats.totalCornPurchased}
+              {loadingSuccessful ? "..." : userStats.totalCornPurchased}
             </div>
             <p className="text-xs text-corn-yellow-600">Fresh ears delivered</p>
           </CardContent>
@@ -120,7 +166,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-corn-yellow-900">
-              ${userStats.totalSpent.toFixed(2)}
+              {loadingSuccessful
+                ? "..."
+                : `$${userStats.totalSpent.toFixed(2)}`}
             </div>
             <p className="text-xs text-corn-yellow-600">
               Supporting local farming
@@ -196,7 +244,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-corn-yellow-900">
-                        $2.99
+                        $5.00
                       </div>
                       <div className="text-sm text-corn-yellow-600">
                         per ear
@@ -222,7 +270,7 @@ export default function DashboardPage() {
                     ? "Processing..."
                     : !canPurchase
                     ? `Wait ${formatTime(timeRemaining)}`
-                    : "Buy 1 Corn for $2.99"}
+                    : "Buy 1 Corn for $5.00"}
                 </Button>
               </div>
 
@@ -248,13 +296,94 @@ export default function DashboardPage() {
       {/* Order History */}
       <Card className="border-corn-yellow-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-corn-yellow-900">
-            <span className="text-2xl">📦</span>
-            Your Corn Order History
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-corn-yellow-900">
+              <span className="text-2xl">📦</span>
+              Your Corn Order History
+            </CardTitle>
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <GearIcon className="h-4 w-4" />
+                  View All Attempts
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-[400px] sm:w-[540px]">
+                <SheetHeader>
+                  <SheetTitle>Purchase Attempts History</SheetTitle>
+                  <SheetDescription>
+                    View all your corn purchase attempts including successful
+                    purchases, rate limits, and errors.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-6 space-y-4">
+                  {/* Summary Stats */}
+                  {allAttemptsData && (
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-corn-yellow-50 rounded-lg">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-corn-yellow-900">
+                          {allAttemptsData.summary.total_attempts}
+                        </div>
+                        <div className="text-sm text-corn-yellow-600">
+                          Total Attempts
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-corn-green-700">
+                          {allAttemptsData.summary.successful_purchases}
+                        </div>
+                        <div className="text-sm text-corn-yellow-600">
+                          Successful
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Attempts List */}
+                  <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                    {loadingAttempts ? (
+                      <div className="text-center py-8">
+                        <div className="text-corn-yellow-600">
+                          Loading attempts...
+                        </div>
+                      </div>
+                    ) : allAttemptsData &&
+                      allAttemptsData.attempts.length > 0 ? (
+                      allAttemptsData.attempts.map((attempt) => (
+                        <AttemptCard key={attempt.id} attempt={attempt} />
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <span className="text-4xl mb-2 block">🌽</span>
+                        <div className="text-corn-yellow-600">
+                          No attempts yet
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </CardHeader>
         <CardContent>
-          {orders.length > 0 ? (
+          {loadingSuccessful ? (
+            <div className="text-center py-8">
+              <div className="text-corn-yellow-600">
+                Loading your corn orders...
+              </div>
+            </div>
+          ) : successfulError ? (
+            <div className="text-center py-8">
+              <span className="text-4xl mb-2 block">⚠️</span>
+              <h3 className="text-lg font-semibold text-red-600 mb-2">
+                Failed to load orders
+              </h3>
+              <p className="text-red-500">
+                Please refresh the page or try again later.
+              </p>
+            </div>
+          ) : orders.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {orders.map((order) => (
                 <OrderCard key={order.transactionId} order={order} />
