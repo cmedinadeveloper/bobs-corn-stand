@@ -51,7 +51,7 @@ A premium corn ordering system built with Next.js, featuring rate-limited purcha
    ```bash
    # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
    
    # Upstash Redis Configuration
    UPSTASH_REDIS_REST_URL=your_upstash_redis_url
