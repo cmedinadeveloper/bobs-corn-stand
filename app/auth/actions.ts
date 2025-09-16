@@ -83,9 +83,9 @@ export async function signup(data: SignupFormData): Promise<ActionResult> {
       };
     }
 
-    // Redirect to a confirmation page or dashboard
+    // Redirect to email confirmation page
     revalidatePath("/", "layout");
-    redirect("/dashboard");
+    redirect("/auth/confirm-email");
   } catch (error) {
     if (error instanceof Error) {
       if (isRedirectError(error)) {
