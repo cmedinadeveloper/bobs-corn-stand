@@ -4,7 +4,7 @@ import { RATE_LIMIT_WINDOW_SECONDS } from "@/constants/corn";
 
 export const cornPurchaseRateLimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(1, `${RATE_LIMIT_WINDOW_SECONDS} s`), // 1 request per 60 seconds
+  limiter: Ratelimit.tokenBucket(1, `${RATE_LIMIT_WINDOW_SECONDS} s`, 1), // 1 token, refills every 60 seconds, max 1 token
   analytics: true,
   prefix: "@upstash/ratelimit/corn",
   ephemeralCache: new Map(), // Add in-memory cache for immediate consistency
