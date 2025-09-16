@@ -25,6 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { signOut } from "@/app/auth/actions";
 
 export function NavUser({
   user,
@@ -32,10 +33,14 @@ export function NavUser({
   user: {
     name: string;
     email: string;
-    avatar: string;
+    avatar?: string;
   };
 }) {
   const { isMobile } = useSidebar();
+
+  const handleLogout = () => {
+    signOut();
+  };
 
   return (
     <SidebarMenu>
@@ -49,7 +54,11 @@ export function NavUser({
               <Avatar className="h-8 w-8 rounded-lg border-2 border-corn-yellow-300">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg bg-corn-yellow-200 text-corn-yellow-900">
-                  🌽
+                  {user.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase() || "🌽"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -74,7 +83,11 @@ export function NavUser({
                 <Avatar className="h-8 w-8 rounded-lg border-2 border-corn-yellow-300">
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback className="rounded-lg bg-corn-yellow-200 text-corn-yellow-900">
-                    🌽
+                    {user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase() || "🌽"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -110,7 +123,10 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="bg-corn-yellow-200" />
-            <DropdownMenuItem className="hover:bg-red-50 text-red-700">
+            <DropdownMenuItem
+              className="hover:bg-red-50 text-red-700 cursor-pointer"
+              onClick={handleLogout}
+            >
               <LogOut />
               Log out
             </DropdownMenuItem>

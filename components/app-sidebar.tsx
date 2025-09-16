@@ -27,13 +27,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { createClient } from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 const data = {
-  user: {
-    name: "Bob Farmer",
-    email: "bob@cornstand.com",
-    avatar: "/avatars/bob.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -147,6 +144,62 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [user, setUser] = React.useState<User | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const supabase = createClient();
+
+    async function getUser() {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (!error && user) {
+        setUser(user);
+      }
+      setLoading(false);
+    }
+
+    // Get initial user
+    getUser();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Create user data for NavUser component
+  const userData = React.useMemo(() => {
+    if (!user) {
+      return {
+        name: "Guest User",
+        email: "guest@example.com",
+        avatar: "",
+      };
+    }
+
+    const firstName = user.user_metadata?.first_name || "";
+    const lastName = user.user_metadata?.last_name || "";
+    const fullName =
+      user.user_metadata?.full_name ||
+      `${firstName} ${lastName}`.trim() ||
+      user.email?.split("@")[0] ||
+      "Corn Lover";
+
+    return {
+      name: fullName,
+      email: user.email || "",
+      avatar: user.user_metadata?.avatar_url || "",
+    };
+  }, [user]);
   return (
     <Sidebar
       collapsible="offcanvas"
@@ -174,7 +227,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter className="bg-corn-yellow-50">
-        <NavUser user={data.user} />
+        {loading ? (
+          <div className="p-4 text-center text-corn-yellow-600">Loading...</div>
+        ) : (
+          <NavUser user={userData} />
+        )}
       </SidebarFooter>
     </Sidebar>
   );
